@@ -10,9 +10,15 @@ int tryLevel = 0;
 TryBlock* tryBlock = NULL;
 TryExit tryExit = NULL;
 
+void tryEnter() {
+}
+
+void tryLeave() {
+}
+
 TryBlock* tryBegin() {
     TryBlock* result = &tryBlocks[tryLevel++];
-    result->return_ = 0;
+    result->break_ = 0;
 
     result->code = 0;
     result->throw_ = 0;
@@ -23,10 +29,10 @@ TryBlock* tryBegin() {
     return result;
 }
 
-int tryReturn() {
+int tryBreak() {
     if (tryBlock != NULL) {
-        if (tryBlock->return_ == 0) {
-            tryBlock->return_++;
+        if (tryBlock->break_ == 0) {
+            tryBlock->break_++;
 
             return 1;
         }
@@ -48,6 +54,7 @@ void tryThrow(int code) {
         }
     }
 
+    /* Unhandled exception */
     if (tryExit != NULL) {
         tryExit(code);
     } else {
@@ -86,8 +93,8 @@ void tryEnd() {
     tryBlock = --tryLevel > 0 ? &tryBlocks[tryLevel - 1] : NULL;
     if ((tryBlockOld->throw_ > 0) && (tryBlockOld->catch_ == 0)) {
         tryThrow(tryBlockOld->code);
-    } else if (tryBlockOld->return_ > 0) {
-        longjmp(tryBlockOld->returnPoint, 9);
+    } else if (tryBlockOld->break_ > 0) {
+        longjmp(tryBlockOld->breakPoint, 9);
     }
 }
 

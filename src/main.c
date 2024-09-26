@@ -152,6 +152,29 @@ int testCase8() {
     return 0;
 }
 
+int testCase9() {
+    int result = 0;
+
+    int index;
+    for (index = 0; index < 100; index++) {
+        __TRY {
+            if (index >= 10) {
+                __BREAK;
+            }
+
+            if ((index % 2) == 0) {
+                __CONTINUE;
+            }
+
+            result++;
+        } __FINALLY {
+            result++;
+        } __TRY_END;
+    }
+
+    return result;
+}
+
 typedef int (*TestTest)();
 
 void testTest(const char* name, const TestTest test, int result) {
@@ -179,6 +202,7 @@ int main() {
         testTest("case6", &testCase6, 1);
         testTest("case7", &testCase7, 4);
         testTest("case8", &testCase8, 5);
+        testTest("case9", &testCase9, 16);
 
         print("test SUCCEED all\n");
     } __CATCH_ANY {
