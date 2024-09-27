@@ -143,10 +143,10 @@ int testCase8() {
             testCase8_1();
         } __TRY_END;
     } __CATCH_ANY {
-        int result = tryCode();
+        int result = __TRY_CODE;
 
         __RETURN(result);
-        /* _RETURN(tryCode()) : The value changes because tryCode is executed at the return point. */
+        /* __RETURN(__TRY_CODE) : The value changes because tryCode is executed at the return point. */
     } __TRY_END;
 
     return 0;
@@ -206,7 +206,7 @@ int main() {
 
         print("test SUCCEED all\n");
     } __CATCH_ANY {
-        print("main.catch: %d\n", tryCode());
+        print("main.catch: %d\n", __TRY_CODE);
     } __TRY_END;
 
     return 0;

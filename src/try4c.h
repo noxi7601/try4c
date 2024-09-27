@@ -3,7 +3,12 @@
 
 #include <setjmp.h>
 
+/* TODO : Let's hide type */
 typedef struct TryBlock {
+    struct TryBlock* left;
+
+    int level;
+
     int break_;
 
     int code;
@@ -20,41 +25,42 @@ typedef struct TryBlock {
 
 typedef void (*TryExit)(int code);
 
-extern TryBlock* tryBlock;
 extern TryExit tryExit;
 
 void tryEnter();
 void tryLeave();
 
-TryBlock* tryBegin();
+void tryBegin();
+void tryEnd();
+
 int tryBreak();
 void tryThrow(int code);
 int tryCatch(int code);
 int tryCatchAny();
 int tryFinally();
-void tryEnd();
 
+TryBlock* tryBlock();
 int tryCode();
 
 #define __TRY \
     tryEnter(); \
     { \
-        tryBlock = tryBegin(); \
-        tryBlock->entryState = setjmp(tryBlock->entryPoint); \
-        if (tryBlock->entryState == 0) {
+        tryBegin(); \
+        tryBlock()->entryState = setjmp(tryBlock()->entryPoint); \
+        if (tryBlock()->entryState == 0) {
 
 #define __BREAK \
             if (tryBreak()) { \
-                if (setjmp(tryBlock->breakPoint) == 0) { \
-                    longjmp(tryBlock->entryPoint, 7); \
+                if (setjmp(tryBlock()->breakPoint) == 0) { \
+                    longjmp(tryBlock()->entryPoint, 7); \
                 } \
             } \
             break
 
 #define __CONTINUE \
             if (tryBreak()) { \
-                if (setjmp(tryBlock->breakPoint) == 0) { \
-                    longjmp(tryBlock->entryPoint, 8); \
+                if (setjmp(tryBlock()->breakPoint) == 0) { \
+                    longjmp(tryBlock()->entryPoint, 8); \
                 } \
             } \
             continue
@@ -62,8 +68,8 @@ int tryCode();
 #define __RETURN(value) \
             do { \
                 if (tryBreak()) { \
-                    if (setjmp(tryBlock->breakPoint) == 0) { \
-                        longjmp(tryBlock->entryPoint, 9); \
+                    if (setjmp(tryBlock()->breakPoint) == 0) { \
+                        longjmp(tryBlock()->entryPoint, 9); \
                     } else { \
                         return value; \
                     } \
@@ -81,12 +87,10 @@ int tryCode();
 
 #define __FINALLY \
         } \
-\
         if (tryFinally()) {
 
 #define __TRY_END \
         } \
-\
         tryEnd(); \
     } \
     tryLeave()
