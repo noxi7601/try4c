@@ -27,11 +27,13 @@ typedef void (*TryExit)(int code);
 
 extern TryExit tryExit;
 
-void tryEnter();
-void tryLeave();
+void tryOpen();
+void tryClose();
 
 void tryBegin();
 void tryEnd();
+
+int tryEnter(int state);
 
 int tryBreak();
 void tryThrow(int code);
@@ -43,11 +45,10 @@ TryBlock* tryBlock();
 int tryCode();
 
 #define __TRY \
-    tryEnter(); \
+    tryOpen(); \
     { \
         tryBegin(); \
-        tryBlock()->entryState = setjmp(tryBlock()->entryPoint); \
-        if (tryBlock()->entryState == 0) {
+        if (tryEnter(setjmp(tryBlock()->entryPoint)) == 0) {
 
 #define __BREAK \
             if (tryBreak()) { \
@@ -93,7 +94,7 @@ int tryCode();
         } \
         tryEnd(); \
     } \
-    tryLeave()
+    tryClose()
 
 #define __TRY_CODE tryCode()
 

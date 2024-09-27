@@ -7,21 +7,17 @@ static TryBlock* tryBlockLast = NULL;
 
 TryExit tryExit = NULL;
 
-void tryEnter() {
+void tryOpen() {
 }
 
-void tryLeave() {
+void tryClose() {
 }
 
 void tryBegin() {
     TryBlock* tryBlock = malloc(sizeof(TryBlock));
     tryBlock->left = tryBlockLast;
-    if (tryBlockLast != NULL) {
-        tryBlock->level = tryBlockLast->level + 1;
-    } else {
-        tryBlock->level = 0;
-    }
-    tryBlockLast = tryBlock;
+
+    tryBlock->level = tryBlockLast != NULL ? tryBlockLast->level + 1 : 0;
 
     tryBlock->break_ = 0;
 
@@ -30,6 +26,8 @@ void tryBegin() {
 
     tryBlock->catch_ = 0;
     tryBlock->finally_ = 0;
+
+    tryBlockLast = tryBlock;
 }
 
 void tryEnd() {
@@ -43,6 +41,14 @@ void tryEnd() {
             longjmp(tryBlockOld->breakPoint, 9);
         }
     }
+}
+
+int tryEnter(int state) {
+    if (tryBlockLast != NULL) {
+        tryBlockLast->entryState = state;
+    }
+
+    return state;
 }
 
 int tryBreak() {
