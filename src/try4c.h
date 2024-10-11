@@ -3,7 +3,7 @@
 
 #include <setjmp.h>
 
-/* TODO : Let's hide type */
+/* Do not change this */
 typedef struct TryBlock {
     struct TryBlock* left;
 

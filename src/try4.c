@@ -14,7 +14,7 @@ void tryClose() {
 }
 
 void tryBegin() {
-    TryBlock* tryBlock = malloc(sizeof(TryBlock));
+    TryBlock* tryBlock = (TryBlock*) malloc(sizeof(TryBlock));
     tryBlock->left = tryBlockLast;
 
     tryBlock->level = tryBlockLast != NULL ? tryBlockLast->level + 1 : 0;
